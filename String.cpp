@@ -1,5 +1,6 @@
 #include <iostream>
-#include <cstring>
+#include <cstring>  
+#include <windows.h>
 using namespace std;
 
 class String
@@ -29,7 +30,7 @@ public:
         str = nullptr;
     }
  }
- String(String &oth){
+ String(const String &oth){
     len = oth.len;
     if (len>0){
         str = new char[len +1];
@@ -145,6 +146,7 @@ ostream& operator<<(ostream &os, const String &s){
 
     
 int main(){
+    SetConsoleOutputCP(CP_UTF8);
   String s1(12);
     cout << "s1 length: " << s1.strLength() << endl;
     
@@ -161,16 +163,12 @@ int main(){
     cout << "Pattern: " << pattern << endl;
     
     int pos = text.BMSearch(pattern);
+    
+    if (pos != -1) {
+        cout << "Pattern found at position: " << pos << endl;
+    } else {
+        cout << "Pattern not found" << endl;
+    }
 
     return 0;
 }
-// Дополнительно (по желанию).
-// 1) Метод класса String.
-// String operator()(int i, int j); // выделяет подстроку из исходной строки с i-ого по j-ый символы.
-// 2) Задача.
-// Есть строка и образец. Удалить из исходной строки первое вхождение образца.
-// Использовать БМ-поиск, функции класса String (включая дополнительную), operator +.
-// Пример.
-// Строка: "На дворе трава на траве дрова"
-// Образец: "траве"
-// Результат: "На дворе трава на дрова"
