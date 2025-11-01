@@ -1,0 +1,2 @@
+
+    decoded = decode(encoded, tree)
