@@ -62,7 +62,7 @@ with open(os.path.join(curr,"encoded.txt"), "wb") as f:
 
 with open(os.path.join(curr,"codes.json"),"w", encoding="utf-8") as f:
     json.dump(codes, f)
-print(" Файл закодирован: encoded.bin")
+print(" Файл закодирован: encoded.txt")
 print(" Таблица кодов сохранена: codes.json")
 
 with open(os.path.join(curr,"decode.txt"), "w", encoding="utf-8") as f:

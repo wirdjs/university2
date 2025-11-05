@@ -9,16 +9,9 @@ class String
 
 public:
  String(int l = 0){
-    if(l >0){
           len = l ;
           str = new char [len+1];
           str[0] = '\0';
-    }else{
-        len = 0;
-        str = NULL;
-        cout<< "Error: len isn't be a negative"<<endl;
-    }
-  
  }
  String(const char *s){
     if(s){
@@ -59,18 +52,15 @@ public:
     return *this;
  }
 char &operator [](int index){
-    if (index < 0 || index >=len)
-    {
-        len = 0;
-        str = NULL;
-        cout << "Error:you write wrong index"<<endl;
-    }else{
-        return str[index];
+    if (index < 0 || index > len) {
+        cout << "Error: index is out of bounds";
+        exit(1);
     }
+    return str[index];
     
 }
  bool operator == (String &oth){
-    return strcmp(this->str , oth.str) == 0;
+     return strcmp(str, oth.str) == 0;
  }
  bool operator != (String &oth){
     return !(*this == oth);
@@ -101,40 +91,58 @@ friend ostream & operator<<(ostream &os, const String &s);
     }
 int BMSearch(String &substring) {
     int substringLen = substring.len;
-    int textLen = len;
-    int helper[256];
 
+    int text = len; 
+    int helper[256]; 
+
+    
     fill_n(helper, 256, substringLen);
-    for (int i = 0; i < substringLen - 1; i++) {
-        helper[(unsigned char)substring.str[i]] = substringLen - 1 - i;
+
+    for (int i = 0; i < substringLen - 1; i++){
+        helper[substring.str[i]] = substringLen - 1 - i;
     }
 
-    int i = substringLen - 1;
+    int i = substringLen - 1; 
+    int j = substringLen - 1; 
 
-    while (i < textLen) {
-        int j = substringLen - 1;
+    
+    while (i < text && j >= 0) { 
         int k = i;
-
-        while (j >= 0 && str[k] == substring.str[j]) {
+        j = substringLen - 1; 
+        while (j >= 0) { 
+            if (str[k] != substring.str[j]) {
+                i += helper[str[i]];
+                j = substringLen - 1;
+                break;
+            }
             j--;
             k--;
         }
-
-        if (j < 0)
-            return i + 1 - substringLen;
-
-        i += helper[(unsigned char)str[i]];
     }
 
-    return -1;
+
+    if (j >= 0) {
+        return -1;
+    } else {
+        return i + 1 - substringLen;
+    }
+
 }
 
 
 };
 istream& operator>>(istream &is, String &s){
-    char buffer[1000];
-    is >> buffer;
-    s = String(buffer);
+  const int massSize = 1000;
+    char mass[massSize];
+
+    is.getline(mass, massSize);
+
+    s.len = strlen(mass);
+
+    delete[] s.str;
+    s.str = new char[s.len + 1];
+    strcpy(s.str, mass);
+
     return is;
 }
 
@@ -147,28 +155,33 @@ ostream& operator<<(ostream &os, const String &s){
     
 int main(){
     SetConsoleOutputCP(CP_UTF8);
-  String s1(12);
-    cout << "s1 length: " << s1.strLength() << endl;
+ String s1, s2, s3;
     
-    String s2("Hello");
-    String s3(" World");
-    String s4 = s2 + s3;
-    cout << "s4: " << s4 << endl;
-    
-    // Тестирование поиска и удаления подстроки
-    String text("На дворе трава на траве дрова");
-    String pattern("траве");
-    
-    cout << "Original: " << text << endl;
-    cout << "Pattern: " << pattern << endl;
-    
-    int pos = text.BMSearch(pattern);
-    
-    if (pos != -1) {
-        cout << "Pattern found at position: " << pos << endl;
+
+    cout << "enter the string s1: ";
+    cin >> s1; 
+    cout << endl;
+
+    cout << "enter a substring b: ";
+    cin >> s2;
+    cout << endl;
+
+
+    cout << "String: " << s1 << "\n" << "Substring: " << s2 << endl;
+    cout << "Length of s1: " << s1.strLength() << "\n" << "Length of s2: " << s2.strLength() << endl;
+
+    cout << "match at symbol number: " << s1.BMSearch(s2) << "\n";
+
+    if (s1 == s2) {
+        cout << "s1 == s2" << endl;
     } else {
-        cout << "Pattern not found" << endl;
+        cout << "s1 != s3" << endl;
     }
 
+    s3 = s1 + s2;
+    cout << "s1 + s2: " << s3 << endl;
+
+    s1 += s2;
+    cout << "s3 += s2: " << s3 << endl;
     return 0;
 }
