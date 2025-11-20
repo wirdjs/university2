@@ -6,8 +6,28 @@ class Array
 { int *arr, len;
  public:
 
- Array(int l = 1, int mode = 1, int range = 10){
-    if(l > 0 && (mode ==1 || mode == 2 || mode ==3) && range > 0){
+Array(int l = 1, int mode = 1, int range = 10);
+Array(int *arr, int l);
+Array(const Array &oth);
+ ~Array(){
+    if(arr) delete []arr; arr = NULL;
+ }
+Array& operator = (const Array &oth); 
+int &operator [](int index);
+
+ bool isSorted(); // проверка на упорядоченность по неубыванию
+ bool operator == (Array&oth); // функция возвращает true, если массивы состоят из одинаковых
+// чисел, при этом их порядок в массивах может различаться
+
+ void Shell_sort();
+ void Heapsort();
+ void Hoar_sort();
+ void Bit_sort();
+ friend istream & operator >> (istream &, Array &);
+ friend ostream & operator << (ostream &, const Array &);
+};
+Array::Array(int l = 1, int mode = 1, int range = 10){
+     if(l > 0 && (mode ==1 || mode == 2 || mode ==3) && range > 0){
         len = l;
         arr = new int [len];
         
@@ -33,10 +53,10 @@ class Array
         arr = {0};
         cout<< "Error: len isn't be a negative or wrong mode"<<endl;
     }
- }
 }
- Array(int *arr, int l){
-    if(l>0){
+}
+Array:: Array(int *arr, int l){
+     if(l>0){
         srand(time(0));
         len = l;
         arr = new int [len];
@@ -50,49 +70,27 @@ class Array
         arr = {0};
         cout<< "Error: len isn't be a negative"<<endl;
     }
- } // конструктор по массиву; len – число элементов в массиве
- Array(const Array &oth){
-    len = oth.len;
+}
+Array::Array(const Array &oth){
+        len = oth.len;
     arr = new int [len];
     for(int i=0; i<len; i++){
         arr[i] = oth.arr[i];
     }
- }
- ~Array(){
-    if(arr) delete []arr; arr = NULL;
- }
- Array& operator = (const Array &oth){
-    if (this != &oth){
-        if(arr) delete []arr ;
+}
+Array& Array:: operator = (const Array &oth){
+    if(this != &oth){
+        if(arr) delete []arr;
         len = oth.len;
         arr = new int [len];
         for(int i=0; i<len; i++){
             arr[i] = oth.arr[i];
         }
     }
-
- }
- int &operator [](int index){
-    if (index < 0 || index >=len){
-        len = 0;
-        arr = NULL;
-        cout << "Error:you write wrong index"<<endl;
-    }else{
-        return arr[index];
-    } 
+    return *this;
 }
-
- bool isSorted(){
-    for (int i =0 ; i < len -1 ; i++){
-        if (arr[i]> arr[i+1]){
-            return false;
-            break;
-        }
-        return true;
-    }
- } // проверка на упорядоченность по неубыванию
- bool operator == (Array&oth){
-    if (len != oth.len){
+bool Array::operator==(Array&oth){
+     if (len != oth.len){
         return false;
     }
     int l = len;
@@ -111,16 +109,23 @@ class Array
         }
     }
     return true;
- } // функция возвращает true, если массивы состоят из одинаковых
-// чисел, при этом их порядок в массивах может различаться
-
- void Shell_sort();
- void Heapsort();
- void Hoar_sort();
- void Bit_sort();
- friend istream & operator >> (istream &, Array &);
- friend ostream & operator << (ostream &, const Array &);
-};
+}
+int &Array:: operator [](int index){
+    if (index < 0 || index >= len) {
+        cout << "Error: index is out of bounds";
+        exit(1);
+    }
+    return arr[index];
+}
+bool Array::isSorted(){
+for (int i =0 ; i < len -1 ; i++){
+        if (arr[i]> arr[i+1]){
+            return false;
+            break;
+        }
+        return true;
+    }
+}
 //Дополнительно (не обязательно).
 //1. Конструктор, который формирует арифметическую прогрессию.
 //2. Перегрузка операции +: слить два упорядоченных массива в третий упорядоченный.

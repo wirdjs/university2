@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstring>  
-#include <windows.h>
 using namespace std;
 
 class String
@@ -13,7 +12,50 @@ public:
           str = new char [len+1];
           str[0] = '\0';
  }
- String(const char *s){
+ String(const char *s);
+ String(const String &oth);
+ ~String() {
+ if(str) delete []str; str = NULL;
+ }
+ int strLength(){
+    return len;
+ }
+ String & operator = (const String &oth);
+char &operator [](int index);
+ bool operator == (String &oth);
+ bool operator != (String &oth);
+ String operator + (const String &oth);
+ String & operator += (const String &oth);
+friend istream & operator>>(istream &is, String &s);
+friend ostream & operator<<(ostream &os, const String &s);
+String operator()(int i, int j);
+int BMSearch(String &substring);
+};
+istream& operator>>(istream &is, String &s){
+  const int massSize = 1000;
+    char mass[massSize];
+
+    is.getline(mass, massSize);
+
+    s.len = strlen(mass);
+
+    delete[] s.str;
+    s.str = new char[s.len + 1];
+    strcpy(s.str, mass);
+
+    return is;
+}
+
+ostream& operator<<(ostream &os, const String &s){
+    if (s.str) os << s.str;
+    return os;
+}
+String::String(int l){
+          len = l ;
+          str = new char [len+1];
+          str[0] = '\0';
+ }
+String::String(const char *s){
     if(s){
         len = strlen(s);
         str= new char[len +1];
@@ -23,7 +65,7 @@ public:
         str = nullptr;
     }
  }
- String(const String &oth){
+String::String(const String &oth){
     len = oth.len;
     if (len>0){
         str = new char[len +1];
@@ -32,13 +74,7 @@ public:
         str = NULL; 
     }
  }
- ~String() {
- if(str) delete []str; str = NULL;
- }
- int strLength(){
-    return len;
- }
- String & operator = (const String &oth){
+ String& String:: operator = (const String &oth){
     if (this != &oth){
         if(str) delete []str;
         len = oth.len;
@@ -51,45 +87,42 @@ public:
     }
     return *this;
  }
-char &operator [](int index){
-    if (index < 0 || index > len) {
-        cout << "Error: index is out of bounds";
-        exit(1);
-    }
-    return str[index];
-    
-}
- bool operator == (String &oth){
-     return strcmp(str, oth.str) == 0;
+ String& String:: operator += (const String &oth){
+    *this = *this + oth;
+    return *this;
  }
- bool operator != (String &oth){
-    return !(*this == oth);
- }
- String operator + (const String &oth){
+ String String:: operator + (const String &oth){
     String res(len+oth.len);
     strcpy(res.str,str);
     strcat(res.str,oth.str);
     return res;
 
  }
- String & operator += (const String &oth){
-    *this = *this + oth;
-    return *this;
- }
-friend istream & operator>>(istream &is, String &s);
-friend ostream & operator<<(ostream &os, const String &s);
-   
-    String operator()(int i, int j) {
-        if (i < 0 || j >= len || i > j) {
-            cout << "Error: Invalid substring indices" << endl;
-        }
-        int subLen = j - i + 1;
-        String subStr(subLen);
-        strncpy(subStr.str, str + i, subLen);
-        subStr.str[subLen] = '\0';
-        return subStr;
+char& String:: operator [](int index){
+    if (index < 0 || index > len) {
+        cout << "Error: index is out of bounds";
+        exit(1);
     }
-int BMSearch(String &substring) {
+    return str[index];
+}
+bool String::operator!=(String &oth) {
+    return !(*this == oth);
+}
+bool String::operator==(String &oth){
+     return strcmp(str, oth.str) == 0;
+  }
+
+  String String::operator()(int i, int j) {
+      if (i < 0 || j >= len || i > j) {
+          cout << "Error: Invalid substring indices" << endl;
+      }
+      int subLen = j - i + 1;
+      String subStr(subLen);
+      strncpy(subStr.str, str + i, subLen);
+      subStr.str[subLen] = '\0';
+      return subStr;
+  }
+int String::BMSearch(String &substring) {
     int substringLen = substring.len;
 
     int text = len; 
@@ -119,42 +152,8 @@ int BMSearch(String &substring) {
             k--;
         }
     }
-
-
-    if (j >= 0) {
-        return -1;
-    } else {
-        return i + 1 - substringLen;
-    }
-
-}
-
-
-};
-istream& operator>>(istream &is, String &s){
-  const int massSize = 1000;
-    char mass[massSize];
-
-    is.getline(mass, massSize);
-
-    s.len = strlen(mass);
-
-    delete[] s.str;
-    s.str = new char[s.len + 1];
-    strcpy(s.str, mass);
-
-    return is;
-}
-
-ostream& operator<<(ostream &os, const String &s){
-    if (s.str) os << s.str;
-    return os;
-}
-
-
-    
 int main(){
-    SetConsoleOutputCP(CP_UTF8);
+   
  String s1, s2, s3;
     
 
