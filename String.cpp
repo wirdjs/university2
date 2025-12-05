@@ -29,6 +29,7 @@ char &operator [](int index);
 friend istream & operator>>(istream &is, String &s);
 friend ostream & operator<<(ostream &os, const String &s);
 String operator()(int i, int j);
+
 int BMSearch(String &substring);
 };
 istream& operator>>(istream &is, String &s){
@@ -152,6 +153,12 @@ int String::BMSearch(String &substring) {
             k--;
         }
     }
+    if (j >= 0) {
+        return -1; 
+    } else {
+        return i + 1 - substringLen; 
+    }
+}
 int main(){
    
  String s1, s2, s3;
