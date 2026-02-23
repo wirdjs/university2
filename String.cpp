@@ -22,7 +22,7 @@ public:
     }       
     String & operator = (const String &oth);
     char &operator [](int index);
-    bool operator == (String &oth);
+    bool operator == (String oth);
     bool operator != (String &oth);
     String operator + (const String &oth);
     String & operator += (const String &oth);
@@ -81,7 +81,7 @@ String& String::HalfStr(){
 String& String::operator = (const String &oth) {
     if (this != &oth) {
         if(str) delete []str;
-        len = oth.len;
+        len = oth.len;  
         if(len > 0) {
             str = new char[len + 1];
             strcpy(str, oth.str);
@@ -116,7 +116,7 @@ bool String::operator != (String &oth) {
     return !(*this == oth);
 }
 
-bool String::operator == (String &oth) {
+bool String::operator == (String oth) {
     return strcmp(str, oth.str) == 0;
 }
 
@@ -184,7 +184,7 @@ int main() {
 //     s3 = s1 + s2;
 //     cout << "s1 + s2: " << s3 << endl;
 
-//     s1 += s2;
+//     s1 += s2;    
 //     cout << "s1 += s2: " << s1 << endl;
 //    s4 = s1(2,3);
 //    cout<< "slice a worb:";
