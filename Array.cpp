@@ -248,7 +248,7 @@ void hoar3(int *array, int left, int right)
     while (i <= j)
     {
         while (array[i] < pivot) i++;
-        while (array[j] > pivot) j--;
+        while (array[j] > pivot) j--; 
         if (i <= j)
         {
             int t = array[i];
@@ -290,9 +290,8 @@ void  Array::BitSort(int arr[], int left, int right, int k) {
             j--;
         }
     }
-    // Рекурсивная сортировка подмассива [l, j] по (k-1)-ому биту
+    
     BitSort(arr, left, j, k - 1);
-    // Рекурсивная сортировка подмассива [i, r] по (k-1)-ому биту
     BitSort(arr, i, right, k - 1);
 }
 void Array::Bit_Sort() {
@@ -305,7 +304,7 @@ void Test(){
     using chrono::duration;
     using chrono::milliseconds;
 
-    Array array1(100000, 1, 100000);
+    Array array1(100000, 2, 100000);
     Array array2 = array1;
     Array array3 = array1;
     Array array4 = array1;
