@@ -11,15 +11,15 @@ class route {
 public:
 
     route(int num = 0);
-    route(const route &); 
-    route &operator=(const route &); 
+    route(const route &oth); 
+    route &operator=(const route &oth); 
     ~route() {
         delete[] town;
     }
 
     int routePrice(int**);
     bool nextRoute();
-    friend ostream &operator << (ostream&, const route&);
+    friend ostream &operator << (ostream&out, const route&way);
 };
 
   
@@ -32,43 +32,45 @@ public:
     }
 
  
-    route::route(const route &x) {
-        number=x.number;
+    route::route(const route &oth) {
+        number=oth.number;
         town = new int[number];
         for (int i = 0; i < number; i++) {
-            town[i] = x.town[i];
+            town[i] = oth.town[i];
         }
     }
 
 
-    route &route::operator=(const route& x) {
-        if (this == &x) { 
+    route &route::operator=(const route&oth) {
+        if (this == &oth) { 
             return *this;
         }
-        number = x.number;
+        number = oth.number;
         delete[] town;
         town = new int[number];
         for (int i = 0; i < number; i++) {
-            town[i] = x.town[i];
+            town[i] = oth.town[i];
         }
         return *this;
     }
 
  
-    int route::routePrice(int **arr) {
-        int sum = 0;
-        for (int i = 0; i < number; i++) {
-            sum += arr[town[i]] [town[(i + 1) % number]];
+        int route::routePrice(int **arr) {
+            int sum = 0;
+            for (int i = 0; i < number; i++) {
+                sum += arr[town[i]] [town[(i + 1) % number]];
+            }
+            return sum;
         }
-        return sum;
-    }
 
   
     bool route::nextRoute(){
-        int i = -1;
+   
+       int i = -1;
        int j;
        int k;
-       for ( k = number - 2; k >= 0; k--) { 
+  
+       for ( k = number - 2; k >= 1; k--) {     
           if (town[k] < town[k + 1]) {
               i = k;
               break;
@@ -88,7 +90,7 @@ public:
                 town[i] = tmp;
                 break; 
             }
-        }
+        } 
 
 
 
@@ -100,9 +102,9 @@ public:
         return true;  
     }
 
-ostream& operator << (ostream &out, const route &a) {
-    for (int i = 0; i < a.number; i++) {
-        out << a.town[i] << " ";
+ostream& operator << (ostream &out, const route &way) {
+    for (int i = 0; i < way.number; i++) {      
+        out << way.town[i] << " ";
     }
     return out;
 }
