@@ -4,12 +4,13 @@
 #include <ctime>
 #include <string>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
-typedef unsigned int BASE;
-typedef unsigned long long DBASE;
+typedef unsigned char BASE;
+typedef unsigned int DBASE;
 #define BASE_SIZE (sizeof(BASE)*8)
 const DBASE BASE_MASK = ((DBASE)1 << BASE_SIZE) - 1;
-const DBASE BASE_MAX = (DBASE)1 << BASE_SIZE;
+const DBASE BASE_MAX = ((DBASE)1 << BASE_SIZE);
 class BigNumber
 {
 private:
@@ -17,7 +18,7 @@ private:
     int len;
     int maxLen;
 public:
-    BigNumber(int maxlen=1,int mode=0);
+    explicit BigNumber(int maxlen=1,int mode=0);
     BigNumber(const BigNumber &bn);
     ~BigNumber(){
         delete[] coef;
@@ -32,12 +33,14 @@ public:
     BigNumber& operator*=(const BigNumber& bn);
     BigNumber operator*(const BigNumber& bn) const;
     BigNumber& operator/=(BASE v);
-    BigNumber operator/(BASE v) const;
+
     BASE operator%(BASE v) const;
+    BigNumber operator/(BASE v) const;
     BigNumber& operator/=(const BigNumber& bn);
     BigNumber operator/(const BigNumber& bn) const;
     BigNumber& operator%=(const BigNumber& bn);
     BigNumber operator%(const BigNumber& bn) const;
+
     void normalize();
 bool operator==(const BigNumber& bn) const;
 bool operator!=(const BigNumber& bn) const;
@@ -97,13 +100,14 @@ ostream &operator<<(ostream &out, const BigNumber &bn){
         // Пропускаем ведущие нули, пока не встретим первое значащее число
         if (!started) {
             if (bn.coef[j] != 0 || j == 0) {
-                out << hex << bn.coef[j]; 
+                // Печатаем значение коэффициента как число (приведение к unsigned int),
+                // чтобы не выводились управляющие символы как символы.
+                out << std::hex << (unsigned int)bn.coef[j]; 
                 started = true;
             }
         } else {
-            out.fill('0');             // Устанавливаем символ '0' для заполнения
-            out.width(sizeof(BASE) * 2); // Устанавливаем ширину поля (8 символов для 32 бит)
-            out << hex << bn.coef[j];
+            out << std::setfill('0') << std::setw(sizeof(BASE) * 2)
+                << std::hex << (unsigned int)bn.coef[j];
         }
     }
     return out;
@@ -139,7 +143,7 @@ BigNumber& BigNumber::operator=(const BigNumber &bn){
     len = bn.len;
     maxLen = bn.maxLen;
    if(coef) delete[] coef;
-   coef = new BASE[len];
+   coef = new BASE[maxLen];
     for (int i = 0; i <len ; i++){
         coef[i] = bn.coef[i];
     }
@@ -214,9 +218,11 @@ string BigNumber::toDecimal() const {
     if (len == 1 && coef[0] == 0) return "0";
     BigNumber temp(*this);
     string res = "";
+    // Делим на 10, используя оператор%(BASE) и operator/=(BASE)
     while (!(temp.len == 1 && temp.coef[0] == 0)) {
-        res += (char)(temp % 10 + '0');
-        temp /= 10;
+        BASE rem = temp % (BASE)10;
+        res += (char)(rem + '0');
+        temp /= (BASE)10;
     }
     reverse(res.begin(), res.end());
     return res;
@@ -246,6 +252,8 @@ BigNumber BigNumber::operator*(const BigNumber& bn) const {
     return result;
 }
 
+
+
 // Деление на короткое число (BASE): проход от старших разрядов к младшим
 BigNumber& BigNumber::operator/=(BASE v) {
     if (v == 0) throw "Division by zero";
@@ -266,15 +274,17 @@ BigNumber BigNumber::operator/(BASE v) const {
     return res;
 }
 
-// Остаток от деления на BASE
+// Оператор остатка для короткого числа (BASE)
 BASE BigNumber::operator%(BASE v) const {
     if (v == 0) throw "Division by zero";
     DBASE rem = 0;
     for (int j = len - 1; j >= 0; j--) {
-        rem = (coef[j] + rem * BASE_MAX) % v;
+        rem = ((DBASE)coef[j] + rem * BASE_MAX) % v;
     }
     return (BASE)rem;
 }
+
+
 
 // Деление на длинное число: побитовый алгоритм (сдвиг и вычитание)
 BigNumber& BigNumber::operator/=(const BigNumber& bn) {
@@ -382,7 +392,6 @@ bool BigNumber::operator>=(const BigNumber& bn) const {
 
 
 
-
 int main(){
     srand(time(NULL));
         BigNumber bn1(1, 1); 
@@ -395,9 +404,10 @@ int main(){
         cout << "Sum: " << bn1 + bn2 << endl;
         cout << "Sum (Dec): " << (bn1 + bn2).toDecimal() << endl;
 
-        cout << "Product (Dec): " << (bn1 * bn2).toDecimal() << endl;
+        BigNumber prod = bn1 * bn2;
+        cout << "Product (Dec): " << prod.toDecimal() << endl;
         cout << "Quotient (Dec): " << (bn1 / bn2).toDecimal() << endl;
-        cout<<"Product (Hex): " << (bn1 * bn2) << endl;
+        cout<<"Product (Hex): " << prod << endl;
         cout << "Quotient (Hex): " << (bn1 / bn2)<< endl;
         cout << "Quotient (Hex): " << (bn1 / 10)<< endl;
 return 0;
