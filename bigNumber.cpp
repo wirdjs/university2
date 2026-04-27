@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// --- реализация методов ---
+
 
 BigNumber::BigNumber(int mLen, int mode) : len(1), maxLen(mLen) {
     coef = new BASE[maxLen]();
@@ -16,7 +16,15 @@ BigNumber::BigNumber(int mLen, int mode) : len(1), maxLen(mLen) {
         len = maxLen;
         normalize();
     }
-}
+    if (mode == 2){
+        for (int i = 0; i < maxLen; i++)
+        {
+            coef[i]=0;
+        }
+        
+    }
+    }
+   
 
 BigNumber::BigNumber(const BigNumber& bn) : len(bn.len), maxLen(bn.maxLen) {
     coef = new BASE[maxLen];
