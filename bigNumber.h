@@ -3,13 +3,13 @@
 
 #include <iostream>
 #include <string>
-#include <cstdint>
-#include <type_traits>
 using namespace std;
+typedef unsigned int BASE;   // 1 byte limb
+typedef unsigned long DBASE;  // accumulator wide enough for BASE*BASE + carry
+
+
 typedef unsigned int BASE;   
 typedef unsigned long DBASE;  
-
-
 
 class BigNumber {
 private:
