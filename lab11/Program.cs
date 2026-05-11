@@ -10,7 +10,7 @@ class Program
             Console.WriteLine("Incorrect input. Enter a positive integer:");
         }
        
-
+    
         int[] A = new int[n];
         Random rand = new Random();
 
