@@ -1,25 +1,43 @@
 ﻿using System;
+
 //Дана целочисленная матрица размера m×n. Определить k – количество различных элементов матрицы (т.е. повторяющиеся элементы считать один раз).
 class Lab_2
 {
+   
     static void Main()
     {
-        int m =0;     
-        Console.WriteLine("enter a size of array:");
-        int.TryParse(Console.ReadLine(),out m);
-        int n = 0;
-        Console.WriteLine("enter a size of array:");
-        int.TryParse(Console.ReadLine(),out n);
+        Console.WriteLine("enter a size of raw:");
+        int m = int.Parse(Console.ReadLine());
+        Console.WriteLine("enter a size of colums:");    
+        int n = int.Parse(Console.ReadLine());
+       
+        
         int[,] A = new int[m,n];
+        Console.WriteLine("enter the mode: ");
+        int mode = int.Parse(Console.ReadLine());
+        if (mode ==1){
         Random rand = new Random();
-        for (int i =0 ; i < m; i++)
+        for (int i =0 ; i < m; i++)  
         {
             for (int j =0; j < n; j++)
             {
-                A[i,j] = rand.Next(1, 100);
+                A[i,j] = rand.Next(1, 10);
             }
         }
-        Console.WriteLine("\nGenerated array:");
+        }
+        else
+        {
+            for (int i =0 ; i < m; i++)  
+            {
+                for (int j =0; j < n; j++)  
+                {
+                    A[i,j] = int.Parse(Console.ReadLine());
+                }
+            }
+        }
+
+       if (mode ==1)Console.WriteLine("\nGenerated array:");
+       else Console.WriteLine("\nEntered array:");
 
         for (int i =0 ; i < m; i++)
         {
@@ -38,14 +56,16 @@ class Lab_2
             for (int j = 0; j < n; j++)
             {
                 bool isUnique = true;
-                for (int k = 0; k < B.Length; k++)
+                int k = 0;
+                while(k < uniq && isUnique)
                 {
                     if (A[i, j] == B[k])
                     {
                         isUnique = false;
-                        break;
                     }
+                    k++;
                 }
+                
                     if (isUnique)
                     {
                     Array.Resize(ref B, uniq + 1);

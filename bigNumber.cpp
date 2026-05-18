@@ -93,9 +93,9 @@ BigNumber BigNumber::operator-(const BigNumber& bn) const {
     for (int i = 0; i < len; i++) {
         DBASE v   = (i < bn.len) ? (DBASE)bn.coef[i] : 0;
         DBASE tmp = BASE_VAL | (DBASE)res.coef[i];  
-        tmp = tmp - v - k;
+        tmp = tmp - v - k;   
         res.coef[i] = (BASE)(tmp);                 
-        k           = !(tmp >> BASE_SIZE);           
+        k           = !(tmp >> BASE_SIZE);             
     }
     res.normalize();
     return res;
@@ -324,12 +324,14 @@ istream& operator>>(istream& in, BigNumber& bn) {
 ostream& operator<<(ostream& out, const BigNumber& bn) {
     out << hex;
     int j = bn.len - 1;
+    out << (unsigned long long)bn.coef[j--];
     while (j >= 0) {
         out.width(BASE_SIZE / 4);   
         out.fill('0');
         out << (unsigned long long)bn.coef[j];
         j--;
     }
+
     return out;
 }
 
@@ -382,7 +384,7 @@ int main() {
     runTest();
 
     cout << "\n--- DEMONSTRATION ---" << endl;
-    BigNumber n1(4, 1), n2(2, 1);
+    BigNumber n1(3, 1), n2(5, 1);
 
     cout << "n1 hex: " << n1 << endl;
     cout << "n1 dec: " << n1.toDecimal() << endl;
@@ -390,16 +392,30 @@ int main() {
     cout << "n2 dec: " << n2.toDecimal() << endl;
 
     BigNumber sum  = n1 + n2;
-    BigNumber diff = (n1 >= n2) ? n1 - n2 : n2 - n1;
+    BigNumber rus = sum - n1;
+    cout<< sum<< endl;
+    cout << rus <<endl;
+    cout << (rus == n2)<< endl;
+
+
+    // cout<< (n1 == n2);
+    // cout<< (n1 != n2);
+    // cout<< (n1 <= n2);
+    // cout<< (n1 >= n2);
+    // cout<< (n1 > n2);
+    // cout<< (n1 < n2);
     // BigNumber prod = n1 * n2;
     // BigNumber quot = n1 / n2;
     // BigNumber rem  = n1 % n2;
 
-    cout << "\nSum:  " << sum.toDecimal()  << endl;
-    cout << "Diff: " << diff.toDecimal() << endl;
+    // cout << "\nSum:  " << sum.toDecimal()  << endl;
+    // cout << "Diff: " << diff.toDecimal() << endl;
     // cout << "Prod: " << prod.toDecimal() << endl;
     // cout << "Quot: " << quot.toDecimal() << endl;
     // cout << "Rem:  " << rem.toDecimal()  << endl;
+    BigNumber num ;
+    cin >> num;
+    cout << num << endl;
 
    
 

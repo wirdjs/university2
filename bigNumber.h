@@ -3,8 +3,8 @@
 #include <string>
 
 
-typedef unsigned short  BASE;
-typedef unsigned int DBASE;
+typedef unsigned  char BASE;
+typedef unsigned short DBASE;
 
 #define BASE_SIZE  (sizeof(BASE) * 8)          
 #define BASE_VAL   ((DBASE)1 << BASE_SIZE)     
