@@ -132,36 +132,39 @@ BigNumber BigNumber::operator*(const BigNumber& bn) const {
 BigNumber& BigNumber::operator*=(const BigNumber& bn) { return *this = *this * bn; }
 
 BigNumber BigNumber::operator*(BASE v) const {
-    BigNumber tmp(1, 0); tmp.coef[0] = v; tmp.len = 1;
-    return *this * tmp;
-}
-BigNumber& BigNumber::operator*=(BASE v) { return *this = *this * v; }
-
-// ─── mul_scalar ────────────────────────────────────────────────────────────
-BigNumber BigNumber::mul_scalar(DBASE v) const {
     if (v == 0) return BigNumber(1, 0);
-    BigNumber res(len + 4, 0);
-    DBASE carry = 0;
-    for (int i = 0; i < len; i++) {
-        DBASE t     = (DBASE)coef[i] * v + carry;
-        res.coef[i] = (BASE)(t);         
-        carry        = t >> BASE_SIZE;    
+
+    int len_w = len + 1;
+    BigNumber w(len_w, 0);
+    w.len = len_w;
+
+
+    int j = 0;
+    DBASE k = 0;
+
+    while (j < len) {
+        DBASE tmp = coef[j] * v + k;
+        w.coef[j] = (BASE)(tmp);
+        k         = tmp >> BASE_SIZE;
+        j++;
     }
-    int idx = len;
-    while (carry) {
-        res.coef[idx++] = (BASE)(carry);
-        carry >>= BASE_SIZE;
+
+    if (k != 0) {
+        w.coef[j] = (BASE)k;
+    } else {
+        w.len--;
     }
-    res.len = max(1, idx);
-    res.normalize();
-    return res;
+
+    return w;
 }
+
+BigNumber& BigNumber::operator*=(BASE v) { return *this = *this * v; }
 
 // ─── Division (big / big) ──────────────────────────────
 
 BigNumber BigNumber::operator/(const BigNumber& bn) const {
-    if (bn.len == 1 && bn.coef[0] == 0) return BigNumber(1, 0); // div by 0
-    if (*this < bn)                       return BigNumber(1, 0); // u < v
+    if (bn.len == 1 && bn.coef[0] == 0) return BigNumber(1, 0); 
+    if (*this < bn)                       return BigNumber(1, 0); 
     if (bn.len == 1) {
         // Single-digit divisor: simple loop
         BigNumber res(*this);
@@ -182,8 +185,8 @@ BigNumber BigNumber::operator/(const BigNumber& bn) const {
 
     DBASE d = BASE_VAL / ((DBASE)bn.coef[n - 1] + 1);
 
-    BigNumber v   = bn.mul_scalar(d);
-    BigNumber u_p = this->mul_scalar(d);
+    BigNumber v   = bn * d;
+    BigNumber u_p = *this * d;
 
 
     BigNumber u(u_p.len + 1, 0);
@@ -352,7 +355,7 @@ string BigNumber::toDecimal() const {
 // ─── Test ──────────────────────────────────────────────────────────────────
 
 void runTest() {
-    cout << "Running 1000 random division tests (base 2^32)..." << endl;
+    cout << "Running 1000 random " << endl;
         mt19937_64 rng(random_device{}());
         uniform_int_distribution<int> distA(1, 6);
         uniform_int_distribution<int> distD(1, 3);
@@ -391,13 +394,16 @@ int main() {
     cout << "n2 hex: " << n2 << endl;
     cout << "n2 dec: " << n2.toDecimal() << endl;
 
-    BigNumber sum  = n1 + n2;
-    BigNumber rus = sum - n1;
-    cout<< sum<< endl;
-    cout << rus <<endl;
-    cout << (rus == n2)<< endl;
+    BigNumber multBnBn  = n1 * n2;
+    BASE n3 = 251;
+    // DBASE n4 = 10000;
+    BigNumber multBnV = n1 * n3;
+    // BigNumber multBnDB = n1 * n4;
 
-
+    cout << "\n--- MULTIPLICATION ---" << endl;
+    cout << "n1 * n2 dec: " << multBnBn.toDecimal() << endl;        
+    cout << "n1 * n3 dec: " << multBnV.toDecimal() << endl;        
+    // cout << "n1 * n4 dec: " << multBnDB.toDecimal() << endl;        
     // cout<< (n1 == n2);
     // cout<< (n1 != n2);
     // cout<< (n1 <= n2);
@@ -413,9 +419,7 @@ int main() {
     // cout << "Prod: " << prod.toDecimal() << endl;
     // cout << "Quot: " << quot.toDecimal() << endl;
     // cout << "Rem:  " << rem.toDecimal()  << endl;
-    BigNumber num ;
-    cin >> num;
-    cout << num << endl;
+   
 
    
 

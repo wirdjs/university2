@@ -3,8 +3,8 @@
 #include <string>
 
 
-typedef unsigned  char BASE;
-typedef unsigned short DBASE;
+typedef unsigned  int BASE;
+typedef unsigned  long long DBASE;
 
 #define BASE_SIZE  (sizeof(BASE) * 8)          
 #define BASE_VAL   ((DBASE)1 << BASE_SIZE)     
@@ -42,6 +42,7 @@ public:
     BigNumber  operator*(const BigNumber& bn) const;
     BigNumber& operator*=(const BigNumber& bn);
     BigNumber  operator*(BASE v) const;
+    // BigNumber operator*(DBASE v) const;
     BigNumber& operator*=(BASE v);
 
     BigNumber  operator/(const BigNumber& bn) const;
@@ -53,7 +54,7 @@ public:
     BigNumber& operator%=(const BigNumber& bn);
     BASE       operator%(BASE v) const;
 
-    BigNumber mul_scalar(DBASE v) const;
+    
 
     std::string toDecimal() const;
 
