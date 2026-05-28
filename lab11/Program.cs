@@ -1,53 +1,66 @@
-﻿using System;
+﻿    using System;
+using System.Globalization;
+using System.Numerics;
+
 class Program
-{
-    static void Main()
     {
-        int n ;
-       Console.WriteLine("enter a size of array:");
-
-     while(!int.TryParse(Console.ReadLine(), out n)|| n <= 0){
-            Console.WriteLine("Incorrect input. Enter a positive integer:");
-        }
-       
-
-        int[] A = new int[n];
-        Random rand = new Random();
-
-        for (int i = 0; i < A.Length; i++)
+        static void Main()
         {
-            A[i] = rand.Next(1, 100);
-        }   
+            Console.WriteLine("enter the size of array: ");
+            int n = int.Parse(Console.ReadLine());   
+        
+        
+            int[] A = new int[n];
+            
 
-        Console.WriteLine("\nGenerated array:");
-        Console.WriteLine(string.Join(", ", A));
-   
-        int uniq = 0;
-int[] B = new int[uniq];
+            Console.Write("enter the mode: ");
+            int mode =int.Parse(Console.ReadLine());
 
-for (int i = 0; i < A.Length; i++)
-{
-    bool isUnique = true;
+            if (mode == 1){
+                Random rand = new Random();
+            for (int i = 0; i < A.Length; i++){
+                A[i] = rand.Next(1, 20);
+            }
+            }
+            else
+            {
+                for (int i = 0; i < A.Length; i++)
+                {
+                    A[i] = int.Parse(Console.ReadLine());
+                }
+            }
 
-    for (int j = 0; j < B.Length; j++)
+
+            if (mode ==1)Console.WriteLine("\nGenerated array:");
+            else Console.WriteLine("\nEntered array:");
+            Console.WriteLine(string.Join(", ", A));
+    
+            int uniq = 0;
+    int[] B = new int[uniq];
+
+    for (int i = 0; i < A.Length; i++)
     {
-        if (A[i] == B[j])
+        bool isUnique = true;
+
+        int j = 0;
+            while (j < uniq && isUnique)
+            {
+                if(A[i] == B[j])
+                {
+                    isUnique = false;
+                }
+                j++;
+            }
+        if (isUnique)
         {
-            isUnique = false;
-            break;
+            Array.Resize(ref B, uniq + 1);
+            B[uniq] = A[i];
+            uniq++;
         }
     }
 
-    if (isUnique)
-    {
-        Array.Resize(ref B, uniq + 1);
-        B[uniq] = A[i];
-        uniq++;
+    Console.WriteLine("\nUnique elements:");
+    Console.WriteLine(string.Join(", ", B));
+    Console.WriteLine($"\nNumber of unique elements: {uniq}");
+        }
     }
-}
-
-Console.WriteLine("\nUnique elements:");
-Console.WriteLine(string.Join(", ", B));
-Console.WriteLine($"\nNumber of unique elements: {uniq}");
-    }
-}
