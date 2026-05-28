@@ -2,23 +2,20 @@
 #include <iostream>
 #include <string>
 using namespace std;
-typedef unsigned int BASE;   // 1 byte limb
-typedef unsigned long DBASE;  // accumulator wide enough for BASE*BASE + carry
 
+typedef unsigned int BASE;
+typedef unsigned long long DBASE;
 
-typedef unsigned  char BASE;
-typedef unsigned short DBASE;
-
-#define BASE_SIZE  (sizeof(BASE) * 8)          
-#define BASE_VAL   ((DBASE)1 << BASE_SIZE)     
+#define BASE_SIZE  (sizeof(BASE) * 8)
+#define BASE_VAL   ((DBASE)1 << BASE_SIZE)
 
 class BigNumber {
 public:
-    BASE* coef;   
+    BASE* coef;
     int   len;
     int   maxLen;
 
-    BigNumber(int mLen = 1, int mode = 0);   
+    BigNumber(int mLen = 1, int mode = 0);
     BigNumber(const BigNumber& bn);
     ~BigNumber();
     BigNumber& operator=(const BigNumber& bn);
@@ -56,8 +53,7 @@ public:
     BigNumber& operator%=(const BigNumber& bn);
     BASE       operator%(BASE v) const;
 
-    BigNumber mul_scalar(DBASE v) const;
-
+    void inputDecimal(std::istream& in);
     std::string toDecimal() const;
 
     friend std::istream& operator>>(std::istream& in,  BigNumber& bn);

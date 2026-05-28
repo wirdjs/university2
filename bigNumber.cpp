@@ -132,138 +132,133 @@ BigNumber BigNumber::operator*(const BigNumber& bn) const {
 BigNumber& BigNumber::operator*=(const BigNumber& bn) { return *this = *this * bn; }
 
 BigNumber BigNumber::operator*(BASE v) const {
-    BigNumber tmp(1, 0); tmp.coef[0] = v; tmp.len = 1;
-    return *this * tmp;
+ if (v == 0) return BigNumber(1, 0);
+
+    int len_w = len + 1;
+    BigNumber w(len_w, 0);
+    w.len = len_w;
+
+
+    int j = 0;
+    DBASE k = 0;
+
+    while (j < len) {
+        DBASE tmp = (DBASE)coef[j] * (DBASE)v + k;
+        w.coef[j] = (BASE)(tmp);
+        k         = tmp >> BASE_SIZE;
+        j++;
+    }
+
+    if (k != 0) {
+        w.coef[j] = (BASE)k;
+    } else {
+        w.len--;
+    }
+
+    return w;
 }
 BigNumber& BigNumber::operator*=(BASE v) { return *this = *this * v; }
-
-// ─── mul_scalar ────────────────────────────────────────────────────────────
-BigNumber BigNumber::mul_scalar(DBASE v) const {
-    if (v == 0) return BigNumber(1, 0);
-    BigNumber res(len + 4, 0);
-    DBASE carry = 0;
-    for (int i = 0; i < len; i++) {
-        DBASE t     = (DBASE)coef[i] * v + carry;
-        res.coef[i] = (BASE)(t);         
-        carry        = t >> BASE_SIZE;    
-    }
-    int idx = len;
-    while (carry) {
-        res.coef[idx++] = (BASE)(carry);
-        carry >>= BASE_SIZE;
-    }
-    res.len = max(1, idx);
-    res.normalize();
-    return res;
-}
 
 // ─── Division (big / big) ──────────────────────────────
 
 BigNumber BigNumber::operator/(const BigNumber& bn) const {
-    if (bn.len == 1 && bn.coef[0] == 0) return BigNumber(1, 0); // div by 0
-    if (*this < bn)                       return BigNumber(1, 0); // u < v
-    if (bn.len == 1) {
-        // Single-digit divisor: simple loop
-        BigNumber res(*this);
-        DBASE r = 0;
-        for (int j = len - 1; j >= 0; j--) {
-            DBASE t     = (r << BASE_SIZE) + (DBASE)coef[j];  // r*b + u_j
-            res.coef[j] = (BASE)(t / (DBASE)bn.coef[0]);
-            r            = t % (DBASE)bn.coef[0];
-        }
-        res.normalize();
-        return res;
-    }
+    if (bn.len == 1 && bn.coef[0] == 0)
+        return BigNumber(1, 0);
 
-    int n = bn.len;
-    int m = len - n;  
+    if (*this < bn)
+        return BigNumber(1, 0);
 
-    // D1. Normalization
+    if (bn.len == 1)
+        return *this / bn.coef[0];
 
+    int n = bn.len;       // length of v
+    int m = len - n;      // u has length m + n
+    DBASE mask = BASE_VAL - 1;
+
+    // D1. Normalization.
     DBASE d = BASE_VAL / ((DBASE)bn.coef[n - 1] + 1);
+    BigNumber v = bn * (BASE)d;
+    BigNumber uNorm = *this * (BASE)d;
 
-    BigNumber v   = bn.mul_scalar(d);
-    BigNumber u_p = this->mul_scalar(d);
-
-
-    BigNumber u(u_p.len + 1, 0);
-    memcpy(u.coef, u_p.coef, u_p.len * sizeof(BASE));
-    u.len = u_p.len + 1;
+    // Add an extra high zero digit: u = (u_{m+n} ... u_0), u_{m+n} = 0.
+    BigNumber u(m + n + 1, 0);
+    for (int i = 0; i < uNorm.len; i++) {
+        u.coef[i] = uNorm.coef[i];
+    }
+    u.len = m + n + 1;
 
     BigNumber q(m + 1, 0);
     q.len = m + 1;
 
-    // D2-D7 main loop
-    for (int j = m; j >= 0; j--) {
-        // D3. Compute q̂
-        DBASE ujn  = (j + n     < u.len) ? (DBASE)u.coef[j + n]     : 0;
-        DBASE ujn1 = (j + n - 1 < u.len) ? (DBASE)u.coef[j + n - 1] : 0;
-        DBASE ujn2 = (j + n - 2 >= 0 && j + n - 2 < u.len)
-                        ? (DBASE)u.coef[j + n - 2] : 0;
+    // D2. Initial j.
+    int j = m;
+    while (j >= 0) {
+        // D3. Compute q' and r'.
+        DBASE numerator = ((DBASE)u.coef[j + n] << BASE_SIZE) + (DBASE)u.coef[j + n - 1];
+        DBASE q_ = numerator / (DBASE)v.coef[n - 1];
+        DBASE r_ = numerator % (DBASE)v.coef[n - 1];
 
-        DBASE vn1 = (DBASE)v.coef[n - 1];
-        DBASE vn2 = (n >= 2) ? (DBASE)v.coef[n - 2] : 0;
-
-        
-        DBASE num = (ujn << BASE_SIZE) | ujn1;
-        DBASE qh  = num / vn1;
-        DBASE rh  = num % vn1;
-
-        
-        if (qh >= BASE_VAL) { qh = BASE_VAL - 1; rh = num - qh * vn1; }
-
-        
-        while (rh < BASE_VAL) {
-            
-            DBASE lhs = qh * vn2;
-            DBASE rhs = (rh << BASE_SIZE) | ujn2;
-            if (lhs <= rhs) break;
-            qh--;
-            rh += vn1;
+        if (q_ == BASE_VAL) {
+            q_ = BASE_VAL - 1;
+            r_ += (DBASE)v.coef[n - 1];
         }
 
-        // D4.
+        while (n > 1) {
+            DBASE left = q_ * (DBASE)v.coef[n - 2];
+            DBASE right = (r_ << BASE_SIZE) + (DBASE)u.coef[j + n - 2];
+            if (left <= right) break;
+
+            q_--;
+            r_ += (DBASE)v.coef[n - 1];
+            if (r_ >= BASE_VAL) break;
+        }
+
+        // D4. (u_{j+n} ... u_j) -= q' * (v_{n-1} ... v_0).
+        // carryBorrow is the high part of q' * v_i plus borrow from subtraction.
         DBASE k = 0;
         for (int i = 0; i < n; i++) {
-            DBASE p   = qh * (DBASE)v.coef[i] + k;
-            BASE  lo  = (BASE)(p);           // p % 2^32
-            DBASE nk  = p >> BASE_SIZE;      // p / 2^32
-            int   idx = j + i;
-            DBASE uij = (idx < u.len) ? (DBASE)u.coef[idx] : 0;
-            if (uij < (DBASE)lo) {
-                u.coef[idx] = (BASE)(uij + BASE_VAL - (DBASE)lo);
-                nk++;
+            DBASE p = q_ * (DBASE)v.coef[i];
+            DBASE sub = (p & mask) + k;
+            DBASE borrow = sub >> BASE_SIZE;
+            sub &= mask;
+
+            if ((DBASE)u.coef[j + i] < sub) {
+                u.coef[j + i] = (BASE)((DBASE)u.coef[j + i] + BASE_VAL - sub);
+                borrow++;
             } else {
-                u.coef[idx] = (BASE)(uij - (DBASE)lo);
+                u.coef[j + i] = (BASE)((DBASE)u.coef[j + i] - sub);
             }
-            k = nk;
+
+            k = (p >> BASE_SIZE) + borrow;
         }
 
-        // D5. 
-        bool need_compensate = false;
-        if ((j + n) < u.len) {
-            if ((DBASE)u.coef[j + n] < k) {
-                need_compensate = true;
-            } else {
-                u.coef[j + n] = (BASE)((DBASE)u.coef[j + n] - k);
-            }
+        bool kBorrow = false;
+        if ((DBASE)u.coef[j + n] < k) {
+            u.coef[j + n] = (BASE)((DBASE)u.coef[j + n] + BASE_VAL - k);
+            kBorrow = true;
+        } else {
+            u.coef[j + n] = (BASE)((DBASE)u.coef[j + n] - k);
         }
 
-        // D6. 
-        if (need_compensate) {
-            qh--;
-            DBASE ak = 0;
+        // D5-D6. q_j = q'. If k = 1, compensate by q_j-- and add v back.
+        if (kBorrow) {
+            q_--;
+            DBASE carry = 0;
             for (int i = 0; i < n; i++) {
-                DBASE t       = (DBASE)u.coef[i + j] + (DBASE)v.coef[i] + ak;
-                u.coef[i + j] = (BASE)(t);
-                ak             = t >> BASE_SIZE;
+                DBASE sum = (DBASE)u.coef[j + i] + (DBASE)v.coef[i] + carry;
+                u.coef[j + i] = (BASE)(sum & mask);
+                carry = sum >> BASE_SIZE;
             }
-         
+            u.coef[j + n] = (BASE)((DBASE)u.coef[j + n] + carry);
         }
 
-        q.coef[j] = (BASE)(qh);   // D5
+        q.coef[j] = (BASE)q_;
+
+        // D7.
+        j--;
     }
 
+    // D8 is needed for the normalized remainder. operator/ returns only q.
     q.normalize();
     return q;
 }
@@ -272,8 +267,17 @@ BigNumber& BigNumber::operator/=(const BigNumber& bn) { return *this = *this / b
 // ─── Division by single BASE digit ─────────────────────────────────────────
 
 BigNumber BigNumber::operator/(BASE v) const {
-    BigNumber divisor(1, 0); divisor.coef[0] = v; divisor.len = 1;
-    return *this / divisor;
+    if (v == 0) return BigNumber(1, 0);
+
+    BigNumber res(*this);
+    DBASE r = 0;
+    for (int j = len - 1; j >= 0; j--) {
+        DBASE tmp = (r << BASE_SIZE) + (DBASE)coef[j];
+        res.coef[j] = (BASE)(tmp / (DBASE)v);
+        r = tmp % (DBASE)v;
+    }
+    res.normalize();
+    return res;
 }
 BigNumber& BigNumber::operator/=(BASE v) { return *this = *this / v; }
 
@@ -292,7 +296,7 @@ BASE BigNumber::operator%(BASE v) const {
     return (BASE)r;
 }
 
-// ─── Hex ───────────────────────────────────────────────────────────────
+// ─── Hex input/output ───────────────────────────────────────────────────
 
 istream& operator>>(istream& in, BigNumber& bn) {
     string s; in >> s;
@@ -309,6 +313,10 @@ istream& operator>>(istream& in, BigNumber& bn) {
         if ('0' <= s[i] && s[i] <= '9') tmp = s[i] - '0';
         else if ('a' <= s[i] && s[i] <= 'f') tmp = s[i] - 'a' + 10;
         else if ('A' <= s[i] && s[i] <= 'F') tmp = s[i] - 'A' + 10;
+        else {
+            bn = BigNumber(1, 0);
+            return in;
+        }
 
         res.coef[j] |= (BASE)(tmp << k);
         k += 4;
@@ -322,17 +330,37 @@ istream& operator>>(istream& in, BigNumber& bn) {
 }
 
 ostream& operator<<(ostream& out, const BigNumber& bn) {
+
     out << hex;
     int j = bn.len - 1;
     out << (unsigned long long)bn.coef[j--];
     while (j >= 0) {
-        out.width(BASE_SIZE / 4);   
+        out.width(BASE_SIZE / 4);
         out.fill('0');
         out << (unsigned long long)bn.coef[j];
         j--;
     }
-
     return out;
+}
+
+// ─── Decimal input ──────────────────────────────────────────────────────
+
+void BigNumber::inputDecimal(istream& in) {
+    string s;
+    in >> s;
+
+    BigNumber res(1, 0);
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (s[i] < '0' || s[i] > '9') {
+            *this = BigNumber(1, 0);
+            return;
+        }
+        res *= (BASE)10;
+        res += (BASE)(s[i] - '0');
+    }
+
+    res.normalize();
+    *this = res;
 }
 
 // ─── Decimal conversion ────────────────────────────────────────────────────
@@ -352,10 +380,10 @@ string BigNumber::toDecimal() const {
 // ─── Test ──────────────────────────────────────────────────────────────────
 
 void runTest() {
-    cout << "Running 1000 random division tests (base 2^32)..." << endl;
+    cout << "Running 1000 random division tests (base 2^" << BASE_SIZE << ")..." << endl;
         mt19937_64 rng(random_device{}());
         uniform_int_distribution<int> distA(1, 6);
-        uniform_int_distribution<int> distD(1, 3);
+        uniform_int_distribution<int> distD(1,3 );
     int passed = 0, N = 1000;
     while (passed < N) {
         BigNumber A(distA(rng), 1);
@@ -391,11 +419,11 @@ int main() {
     cout << "n2 hex: " << n2 << endl;
     cout << "n2 dec: " << n2.toDecimal() << endl;
 
-    BigNumber sum  = n1 + n2;
-    BigNumber rus = sum - n1;
-    cout<< sum<< endl;
-    cout << rus <<endl;
-    cout << (rus == n2)<< endl;
+   
+cout<< (n2 /n1).toDecimal();
+BigNumber n ;
+n.inputDecimal(cin);
+cout<<n.toDecimal();
 
 
     // cout<< (n1 == n2);
@@ -413,9 +441,7 @@ int main() {
     // cout << "Prod: " << prod.toDecimal() << endl;
     // cout << "Quot: " << quot.toDecimal() << endl;
     // cout << "Rem:  " << rem.toDecimal()  << endl;
-    BigNumber num ;
-    cin >> num;
-    cout << num << endl;
+ 
 
    
 
