@@ -38,7 +38,7 @@ namespace CircleProject
         // 1) Default constructor
         public Circle()
         {
-            x = 0; y = 0; r = 1;
+            x = 0; y = 0; r = 0;
         }
 
         // 1) Constructor with parameters
@@ -46,7 +46,7 @@ namespace CircleProject
         {
             this.x = x;
             this.y = y;
-            this.r = r > 0 ? r : 1;
+            this.r = r ;
         }
 
         public double X => x;
@@ -85,14 +85,12 @@ namespace CircleProject
         // 6) Compare by radius
         public static bool operator ==(Circle a, Circle b)
         {
-            if (ReferenceEquals(a, null) && ReferenceEquals(b, null)) return true;
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) return false;
             return Math.Abs(a.r - b.r) < 1e-9;
         }
         public static bool operator !=(Circle a, Circle b) => !(a == b);
-        public override bool Equals(object obj) =>
-            obj is Circle c && this == c;
-        public override int GetHashCode() => r.GetHashCode();
+            public override bool Equals(object? obj) =>
+                obj is Circle c && this == c;
+            public override int GetHashCode() => r.GetHashCode();
 
 
         // 7) Point inside circle
@@ -121,10 +119,10 @@ namespace CircleProject
         {
             double d = Math.Sqrt((x - other.X) * (x - other.X) + (y - other.Y) * (y - other.Y));
 
-            if (!this.Intersects(other))
+            if (!Intersects(other))
                 throw new InvalidOperationException("Circles do not intersect.");
 
-            if (this.IsInsideOf(other) || other.IsInsideOf(this))
+            if (IsInsideOf(other) || other.IsInsideOf(this))
                 throw new InvalidOperationException("One circle is completely inside another.");
 
             return (r + other.R - d) / 2.0;
@@ -155,9 +153,18 @@ namespace CircleProject
     {
         static void Main()
         {
-            Console.WriteLine("=== Circle Class Testing ===\n");
+            // Console.WriteLine("=== Circle Class Testing ===\n");
+            // // 1) Constructors
+            // Console.WriteLine(" --- 1) Constructors --- ");
+            // ICircleOperations c1 = new Circle();
+            // ICircleOperations c2 = new Circle(1, 2, 5);
+            // ICircleOperations c3 = new Circle(4, 4, 3);
 
-            // // 2) Output and Input via IPrintable
+            // CircleUtils.PrintObject(c1);
+            // CircleUtils.PrintObject(c2);
+            // CircleUtils.PrintObject(c3);
+
+            // 2) Output and Input via IPrintable
             // Console.WriteLine("\n--- 2) Output via IPrintable ---");
             // IPrintable p = new Circle();
             // p.Input();
@@ -215,7 +222,7 @@ namespace CircleProject
         //     c9b.Input();
         //     Console.WriteLine($"A is inside B: {c9a.IsInsideOf(c9b)}");
         //     Console.WriteLine($"B is inside A: {c9b.IsInsideOf(c9a)}");
-        // 10) Inscribed circle radius in intersection
+        // // 10) Inscribed circle radius in intersection
         // Console.WriteLine("\n--- 10) Inscribed circle radius in intersection ---");
         // Circle c10a = new Circle(); 
         // Circle c10b = new Circle();
@@ -237,7 +244,7 @@ namespace CircleProject
         //     double inscR = c10a.InscribedRadiusInIntersection(c10b);
         //     Console.WriteLine($"Inscribed circle radius: {inscR:F4}");
         // }
-        // }
+        }
 
     }
 }

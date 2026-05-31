@@ -132,11 +132,7 @@ BigNumber BigNumber::operator*(const BigNumber& bn) const {
 BigNumber& BigNumber::operator*=(const BigNumber& bn) { return *this = *this * bn; }
 
 BigNumber BigNumber::operator*(BASE v) const {
-<<<<<<< HEAD
  if (v == 0) return BigNumber(1, 0);
-=======
-    if (v == 0) return BigNumber(1, 0);
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
     int len_w = len + 1;
     BigNumber w(len_w, 0);
@@ -147,11 +143,7 @@ BigNumber BigNumber::operator*(BASE v) const {
     DBASE k = 0;
 
     while (j < len) {
-<<<<<<< HEAD
         DBASE tmp = (DBASE)coef[j] * (DBASE)v + k;
-=======
-        DBASE tmp = coef[j] * v + k;
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
         w.coef[j] = (BASE)(tmp);
         k         = tmp >> BASE_SIZE;
         j++;
@@ -165,34 +157,13 @@ BigNumber BigNumber::operator*(BASE v) const {
 
     return w;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 BigNumber& BigNumber::operator*=(BASE v) { return *this = *this * v; }
 
 // ─── Division (big / big) ──────────────────────────────
 
 BigNumber BigNumber::operator/(const BigNumber& bn) const {
-<<<<<<< HEAD
     if (bn.len == 1 && bn.coef[0] == 0)
         return BigNumber(1, 0);
-=======
-    if (bn.len == 1 && bn.coef[0] == 0) return BigNumber(1, 0); 
-    if (*this < bn)                       return BigNumber(1, 0); 
-    if (bn.len == 1) {
-        // Single-digit divisor: simple loop
-        BigNumber res(*this);
-        DBASE r = 0;
-        for (int j = len - 1; j >= 0; j--) {
-            DBASE t     = (r << BASE_SIZE) + (DBASE)coef[j];  // r*b + u_j
-            res.coef[j] = (BASE)(t / (DBASE)bn.coef[0]);
-            r            = t % (DBASE)bn.coef[0];
-        }
-        res.normalize();
-        return res;
-    }
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
     if (*this < bn)
         return BigNumber(1, 0);
@@ -209,22 +180,12 @@ BigNumber BigNumber::operator/(const BigNumber& bn) const {
     BigNumber v = bn * (BASE)d;
     BigNumber uNorm = *this * (BASE)d;
 
-<<<<<<< HEAD
     // Add an extra high zero digit: u = (u_{m+n} ... u_0), u_{m+n} = 0.
     BigNumber u(m + n + 1, 0);
     for (int i = 0; i < uNorm.len; i++) {
         u.coef[i] = uNorm.coef[i];
     }
     u.len = m + n + 1;
-=======
-    BigNumber v   = bn * d;
-    BigNumber u_p = *this * d;
-
-
-    BigNumber u(u_p.len + 1, 0);
-    memcpy(u.coef, u_p.coef, u_p.len * sizeof(BASE));
-    u.len = u_p.len + 1;
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
     BigNumber q(m + 1, 0);
     q.len = m + 1;
@@ -320,6 +281,8 @@ BigNumber BigNumber::operator/(BASE v) const {
 }
 BigNumber& BigNumber::operator/=(BASE v) { return *this = *this / v; }
 
+
+
 // ─── Modulo ────────────────────────────────────────────────────────────────
 
 BigNumber BigNumber::operator%(const BigNumber& bn) const {
@@ -327,11 +290,11 @@ BigNumber BigNumber::operator%(const BigNumber& bn) const {
 }
 BigNumber& BigNumber::operator%=(const BigNumber& bn) { return *this = *this % bn; }
 
-
-BASE BigNumber::operator%(BASE v) const {
+BigNumber BigNumber::operator%(BASE v){
     DBASE r = 0;
-    for (int j = len - 1; j >= 0; j--)
-        r = ((r << BASE_SIZE) + (DBASE)coef[j]) % (DBASE)v;
+    for (int j = len - 1; j >= 0; j--) {
+        DBASE r = ((r << BASE_SIZE) + (DBASE)coef[j])% (DBASE)v;
+    }
     return (BASE)r;
 }
 
@@ -388,42 +351,42 @@ void BigNumber::inputDecimal(istream& in) {
     string s;
     in >> s;
 
-    BigNumber res(1, 0);
-    for (int i = 0; i < (int)s.size(); i++) {
-        if (s[i] < '0' || s[i] > '9') {
-            *this = BigNumber(1, 0);
-            return;
+        BigNumber res(1, 0);
+        for (int i = 0; i < (int)s.size(); i++) {
+            if (s[i] < '0' || s[i] > '9') {
+                *this = BigNumber(1, 0);
+                return;
+            }
+            res *= (BASE)10;
+            res += (BASE)(s[i] - '0');
         }
-        res *= (BASE)10;
-        res += (BASE)(s[i] - '0');
-    }
-
-    res.normalize();
-    *this = res;
+        *this = res;
 }
-
+ 
 // ─── Decimal conversion ────────────────────────────────────────────────────
 
 string BigNumber::toDecimal() const {
     if (len == 1 && coef[0] == 0) return "0";
+
     BigNumber tmp(*this);
     string s;
-    while (!(tmp.len == 1 && tmp.coef[0] == 0)) {
-        s += to_string(tmp % (BASE)10);
-        tmp /= (BASE)10;
-    }
+    do {
+        DBASE r = 0;
+        for (int i = tmp.len - 1; i >= 0; i--)
+        r = ((r << BASE_SIZE) + (DBASE)tmp.coef[i]) % 10;
+
+        s += (char)('0' + r);       
+        tmp /= (BASE)10;         
+    } while (!(tmp.len == 1 && tmp.coef[0] == 0)); 
+    
     reverse(s.begin(), s.end());
+
     return s;
 }
-
 // ─── Test ──────────────────────────────────────────────────────────────────
 
 void runTest() {
-<<<<<<< HEAD
     cout << "Running 1000 random division tests (base 2^" << BASE_SIZE << ")..." << endl;
-=======
-    cout << "Running 1000 random " << endl;
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
         mt19937_64 rng(random_device{}());
         uniform_int_distribution<int> distA(1, 6);
         uniform_int_distribution<int> distD(1,3 );
@@ -462,45 +425,12 @@ int main() {
     cout << "n2 hex: " << n2 << endl;
     cout << "n2 dec: " << n2.toDecimal() << endl;
 
-<<<<<<< HEAD
    
-cout<< (n2 /n1).toDecimal();
-BigNumber n ;
-n.inputDecimal(cin);
-cout<<n.toDecimal();
 
-=======
-    BigNumber multBnBn  = n1 * n2;
-    BASE n3 = 251;
-    // DBASE n4 = 10000;
-    BigNumber multBnV = n1 * n3;
-    // BigNumber multBnDB = n1 * n4;
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
-    cout << "\n--- MULTIPLICATION ---" << endl;
-    cout << "n1 * n2 dec: " << multBnBn.toDecimal() << endl;        
-    cout << "n1 * n3 dec: " << multBnV.toDecimal() << endl;        
-    // cout << "n1 * n4 dec: " << multBnDB.toDecimal() << endl;        
-    // cout<< (n1 == n2);
-    // cout<< (n1 != n2);
-    // cout<< (n1 <= n2);
-    // cout<< (n1 >= n2);
-    // cout<< (n1 > n2);
-    // cout<< (n1 < n2);
-    // BigNumber prod = n1 * n2;
-    // BigNumber quot = n1 / n2;
-    // BigNumber rem  = n1 % n2;
 
-    // cout << "\nSum:  " << sum.toDecimal()  << endl;
-    // cout << "Diff: " << diff.toDecimal() << endl;
-    // cout << "Prod: " << prod.toDecimal() << endl;
-    // cout << "Quot: " << quot.toDecimal() << endl;
-    // cout << "Rem:  " << rem.toDecimal()  << endl;
-<<<<<<< HEAD
- 
-=======
+
    
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
    
 

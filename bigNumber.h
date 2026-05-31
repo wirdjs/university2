@@ -3,19 +3,11 @@
 #include <string>
 using namespace std;
 
-typedef unsigned int BASE;
-typedef unsigned long long DBASE;
+typedef unsigned short BASE;
+typedef unsigned int DBASE;
 
-<<<<<<< HEAD
 #define BASE_SIZE  (sizeof(BASE) * 8)
 #define BASE_VAL   ((DBASE)1 << BASE_SIZE)
-=======
-typedef unsigned  int BASE;
-typedef unsigned  long long DBASE;
-
-#define BASE_SIZE  (sizeof(BASE) * 8)          
-#define BASE_VAL   ((DBASE)1 << BASE_SIZE)     
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
 
 class BigNumber {
 public:
@@ -57,17 +49,14 @@ public:
     BigNumber& operator/=(const BigNumber& bn);
     BigNumber  operator/(BASE v) const;
     BigNumber& operator/=(BASE v);
+    
 
     BigNumber  operator%(const BigNumber& bn) const;
     BigNumber& operator%=(const BigNumber& bn);
-    BASE       operator%(BASE v) const;
-
-<<<<<<< HEAD
-    void inputDecimal(std::istream& in);
-=======
+    BigNumber operator%(BASE v);
     
 
->>>>>>> 1d3f7de661abab5bca62568393881e3a23146508
+    void inputDecimal(std::istream& in);
     std::string toDecimal() const;
 
     friend std::istream& operator>>(std::istream& in,  BigNumber& bn);
