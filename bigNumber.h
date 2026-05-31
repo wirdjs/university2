@@ -45,15 +45,16 @@ public:
     // BigNumber operator*(DBASE v) const;
     BigNumber& operator*=(BASE v);
 
-    BigNumber  operator/(const BigNumber& bn) const;
-    BigNumber& operator/=(const BigNumber& bn);
-    BigNumber  operator/(BASE v) const;
-    BigNumber& operator/=(BASE v);
-    
+    void divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remainder) const;
 
-    BigNumber  operator%(const BigNumber& bn) const;
-    BigNumber& operator%=(const BigNumber& bn);
-    BigNumber operator%(BASE v);
+BigNumber  operator/(const BigNumber& bn) const;
+BigNumber& operator/=(const BigNumber& bn);
+BigNumber  operator/(BASE v) const;
+BigNumber& operator/=(BASE v);
+
+BigNumber  operator%(const BigNumber& bn) const;
+BigNumber& operator%=(const BigNumber& bn);
+BASE operator%(BASE v) const;
     
 
     void inputDecimal(std::istream& in);
