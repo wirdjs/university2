@@ -188,7 +188,7 @@ void BigNumber::divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remai
 
     DBASE d = BASE_VAL / ((DBASE)bn.coef[n - 1] + 1);
     BigNumber v = bn * (BASE)d;
-    BigNumber uNorm = *this * (BASE)d;
+    BigNumber uNorm = *this * (BASE)d; 
 
     BigNumber u(m + n + 1, 0);
     for (int i = 0; i < uNorm.len; i++) {
@@ -210,7 +210,7 @@ void BigNumber::divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remai
             r_ += (DBASE)v.coef[n - 1];
         }
 
-        while (n > 1) {
+        while (n > 1) { 
             DBASE left = q_ * (DBASE)v.coef[n - 2];
             DBASE right = (r_ << BASE_SIZE) + (DBASE)u.coef[j + n - 2];
             if (left <= right) break;
@@ -224,7 +224,7 @@ void BigNumber::divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remai
             DBASE p = q_ * (DBASE)v.coef[i];
             DBASE sub = (p & mask) + k;
             DBASE borrow = sub >> BASE_SIZE;
-            sub &= mask;
+            sub &= mask;  
 
             if ((DBASE)u.coef[j + i] < sub) {
                 u.coef[j + i] = (BASE)((DBASE)u.coef[j + i] + BASE_VAL - sub);
@@ -265,9 +265,9 @@ void BigNumber::divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remai
     }
     remainder.len = n;
 
-    if (d > 1) {
-        remainder = remainder / (BASE)d;
-    }
+
+    remainder = remainder / (BASE)d;
+    
 
     q.normalize();
     remainder.normalize();
@@ -284,6 +284,10 @@ void BigNumber::divBn(const BigNumber& bn, BigNumber& quotient, BigNumber& remai
 BigNumber& BigNumber::operator/=(const BigNumber& bn) {
     return *this = *this / bn;
 }
+BigNumber& BigNumber::operator/=(BASE v){
+    return *this = *this / v;
+}
+
 
     // ─── Division by single BASE digit ─────────────────────────────────────────
 
@@ -446,7 +450,9 @@ BASE BigNumber::operator%(BASE v) const {
         cout << "n2 hex: " << n2 << endl;
         cout << "n2 dec: " << n2.toDecimal() << endl;
 
-    cout<< n2/n1;
+        BigNumber n3;
+        n3.inputDecimal(cin);
+        cout<<n3.toDecimal();
 
 
 

@@ -39,7 +39,7 @@ namespace CircleProject
         public Circle()
         {
             x = 0; y = 0; r = 0;
-        }
+        }   
 
         // 1) Constructor with parameters
         public Circle(double x, double y, double r)
@@ -193,15 +193,15 @@ namespace CircleProject
             // c6b.Input();
             // CircleUtils.CompareCircles(c6a, c6b);
 
-            // //7) Point inside circle
-            // Console.WriteLine("\n--- 7) Point inside circle ---");
-            // Circle c7 = new Circle();
-            // c7.Input();
-            // Console.Write("Enter point x: ");
-            // double px = double.Parse(Console.ReadLine());
-            // Console.Write("Enter point y: ");
-            // double py = double.Parse(Console.ReadLine());
-            // Console.WriteLine($"Point ({px}, {py}) is inside circle: {c7.ContainsPoint(px, py)}");
+            //7) Point inside circle
+            Console.WriteLine("\n--- 7) Point inside circle ---");
+            Circle c7 = new Circle();
+            c7.Input();
+            Console.Write("Enter point x: ");
+            double px = double.Parse(Console.ReadLine());
+            Console.Write("Enter point y: ");
+            double py = double.Parse(Console.ReadLine());
+            Console.WriteLine($"Point ({px}, {py}) is inside circle: {c7.ContainsPoint(px, py)}");
 
             //8) Circle intersection
         //     Console.WriteLine("\n--- 8) Circle intersection ---");  
